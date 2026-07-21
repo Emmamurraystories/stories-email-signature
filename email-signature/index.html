@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stories — Email Signature Generator</title>
+<title>Stories Email Signature Generator</title>
 <style>
   body {
     margin: 0;
@@ -28,7 +28,7 @@
   input {
     width: 100%;
     box-sizing: border-box;
-    padding: 10px 12px;
+    padding: 13px 12px 10px;
     margin-bottom: 16px;
     border: 1px solid #EEE8E0;
     border-radius: 6px;
@@ -38,10 +38,11 @@
     background: #FAF7F3;
   }
   input:focus { outline: none; border-color: #C9BFB1; background: #ffffff; }
+  #name, #title { text-transform: capitalize; }
   .hint { font-size: 12px; color: #6B6B6B; margin: -10px 0 16px; }
   button {
     display: inline-block;
-    padding: 12px 20px;
+    padding: 15px 20px 12px;
     border: none;
     border-radius: 6px;
     background: #353535;
@@ -59,17 +60,17 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Stories email signature</h1>
+  <h1>Stories Email Signature Generator</h1>
   <p class="sub">Fill in your details, check the preview, hit copy, and paste it into Gmail. Takes about a minute.</p>
 
   <div class="panel">
     <h2>Your details</h2>
     <label for="name">Full name</label>
-    <input id="name" type="text" value="First Last" autocomplete="name">
+    <input id="name" type="text" value="" autocomplete="name">
     <label for="title">Job title</label>
-    <input id="title" type="text" value="Job Title">
+    <input id="title" type="text" value="">
     <label for="phone">Phone (optional)</label>
-    <input id="phone" type="text" value="" placeholder="06 12 34 56 78">
+    <input id="phone" type="text" value="">
     <p class="hint">Leave phone empty to omit it from the signature.</p>
   </div>
 
@@ -121,9 +122,13 @@ function buildSignature(name, title, phone) {
 '</table>';
 }
 
+function capitalizeWords(s) {
+  return s.replace(/\S+/g, w => w.charAt(0).toUpperCase() + w.slice(1));
+}
+
 function render() {
-  const name = document.getElementById("name").value.trim() || "First Last";
-  const title = document.getElementById("title").value.trim() || "Job Title";
+  const name = capitalizeWords(document.getElementById("name").value.trim() || "First Last");
+  const title = capitalizeWords(document.getElementById("title").value.trim() || "Job Title");
   const phone = document.getElementById("phone").value.trim();
   document.getElementById("preview").innerHTML = buildSignature(name, title, phone);
 }
