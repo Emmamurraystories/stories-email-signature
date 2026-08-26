@@ -482,7 +482,19 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
   v.addEventListener("error", function () {
     els.srcState.textContent = "failed";
     els.run.disabled = true;
-    note(els.srcErr, "Your browser cannot decode this file. H.264/HEVC mp4, mov and webm usually work; ProRes, DNxHD and some mkv variants do not.", "err");
+    var e = v.error || {};
+    var WHY = {
+      1: "loading was aborted",
+      2: "a network error cut the read short",
+      3: "it started decoding, then gave up",
+      4: "the browser turned the format down flat"
+    };
+    note(els.srcErr,
+      "Your browser would not open this file — " + (WHY[e.code] || "no reason given") + ". " +
+      "Frame size is the usual culprit: most decoders stop at about 4096 pixels a side, so 6K files and tall phone exports can fail even though H.264 itself is fine. " +
+      "Re-exporting at 4K or under normally clears it. ProRes, DNxHD and some mkv variants are never supported." +
+      (e.message ? " [" + e.message + "]" : ""),
+      "err");
   });
 
   /* ---------- settings ---------- */
