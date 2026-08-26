@@ -45,10 +45,9 @@ button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .wrap{max-width:1560px;margin:0 auto;padding:0 20px 120px}
-.topbar{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding:22px 0 16px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.topbar{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding:22px 0 15px;border-bottom:1px solid var(--line);margin-bottom:22px}
 .brand{font-size:21px;font-weight:700;letter-spacing:-.03em}
 .brand .dot{color:var(--accent)}
-.tagline{font-family:"Newsreader",Georgia,serif;font-style:italic;font-size:15px;color:var(--muted);flex:1;min-width:200px}
 .edge{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 
 .app{display:grid;grid-template-columns:302px minmax(0,1fr);gap:26px;align-items:start}
@@ -76,6 +75,23 @@ input[type=number]{font-family:"DM Mono",monospace}
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);font-weight:600}
 
+.labelrow{display:flex;align-items:center;gap:7px}
+.field .lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tip{position:relative;display:inline-flex;line-height:0}
+.tipbtn{width:16px;height:16px;padding:0;border:1px solid var(--line);border-radius:99px;background:var(--panel-2);color:var(--muted);font-size:10px;font-weight:700;line-height:1;cursor:help;display:grid;place-items:center;transition:color .13s,border-color .13s}
+.tipbtn:hover,.tip[data-open="true"] .tipbtn{color:var(--accent);border-color:var(--accent)}
+.tipbody{position:absolute;left:-9px;top:24px;z-index:30;width:286px;max-width:calc(100vw - 52px);display:block;padding:11px 12px 12px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);text-align:left;line-height:1.45;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .13s,transform .13s,visibility .13s}
+.tip:hover .tipbody,.tip:focus-within .tipbody,.tip[data-open="true"] .tipbody{opacity:1;visibility:visible;transform:none}
+.tipbody::before{content:"";position:absolute;top:-5px;left:12px;width:8px;height:8px;background:var(--panel);border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+.tipbody .lead{display:block;margin-bottom:9px;font-size:12px;line-height:1.45;color:var(--text-2)}
+.tipbody .lead em{font-style:normal;font-weight:600;color:var(--text)}
+.tiers{display:flex;flex-direction:column;gap:4px}
+.tiers>span{display:grid;grid-template-columns:30px 1fr;gap:9px;align-items:baseline;padding:3px 5px;margin:0 -5px;border-radius:2px;transition:background .14s}
+.tiers>span[data-on="true"]{background:var(--accent-soft)}
+.tiers b{font-family:"DM Mono",ui-monospace,monospace;font-size:11.5px;font-weight:500;color:var(--muted);text-align:right}
+.tiers>span[data-on="true"] b{color:var(--accent)}
+.tiers i{font-style:normal;font-size:11.5px;line-height:1.36;color:var(--text-2)}
+.tiers>span[data-on="true"] i{color:var(--text)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel-2);cursor:pointer;font-weight:500;transition:background .14s,border-color .14s}
 .btn:hover:not(:disabled){border-color:var(--text-2)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -167,8 +183,6 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
 <div class="wrap">
   <header class="topbar">
     <div class="brand">Frame Lab<span class="dot">.</span></div>
-    <div class="tagline">Drop in a video, pull a contact sheet of its sharpest frames.</div>
-    <div class="edge" id="modeTag">local &middot; nothing uploaded</div>
   </header>
 
   <div class="app">
@@ -198,7 +212,21 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
             <input type="number" id="interval" value="1" min="0.1" max="120" step="0.1">
           </div>
           <div class="field">
-            <label for="cands">Sharpness filter</label>
+            <div class="labelrow">
+              <span class="lbl">Sharpness filter</span>
+              <span class="tip" id="tip" data-open="false">
+                <button type="button" class="tipbtn" id="tipBtn" aria-expanded="false" aria-describedby="tipBody" aria-label="How the sharpness filter works">?</button>
+                <span class="tipbody" role="tooltip" id="tipBody">
+                  <span class="lead">Higher is not sharper, it is <em>choosier</em>. The number is how many frames Frame Lab decodes around each mark before keeping the best one &mdash; more candidates, better odds one of them caught the subject still. Nothing is ever sharpened, and the scan time climbs with the number.</span>
+                  <span class="tiers" id="tiers">
+                    <span data-n="1"><b>Off</b><i>Takes whatever sits on the mark. Fastest, blur and all.</i></span>
+                    <span data-n="3"><b>3&times;</b><i>Quick pass. Catches obvious blur, misses near misses.</i></span>
+                    <span data-n="5"><b>5&times;</b><i>Sweet spot for handheld and talking heads.</i></span>
+                    <span data-n="7"><b>7&times;</b><i>Fast motion, sport, dance. Slowest, and the gain flattens after this.</i></span>
+                  </span>
+                </span>
+              </span>
+            </div>
             <div class="seg" id="cands" role="group" aria-label="Candidates per interval">
               <button type="button" data-n="1" aria-pressed="false">Off</button>
               <button type="button" data-n="3" aria-pressed="false">3&times;</button>
@@ -280,6 +308,7 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
       </label>
       <span class="lcount" id="lCount"></span>
       <span class="spacer"></span>
+      <button class="btn sm hidden" id="lCopy" type="button">Copy image</button>
       <button class="btn sm" id="lExport" type="button">Download selected</button>
       <button class="btn sm primary" id="lSave" type="button">Save this PNG</button>
     </div>
@@ -296,7 +325,8 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
   var els = {
     drop: $("drop"), file: $("file"), srcState: $("srcState"), srcMeta: $("srcMeta"),
     mName: $("mName"), mRes: $("mRes"), mDur: $("mDur"), srcErr: $("srcErr"),
-    interval: $("interval"), cands: $("cands"), candHint: $("candHint"),
+    interval: $("interval"), cands: $("cands"), tiers: $("tiers"),
+    candHint: $("candHint"), tip: $("tip"), tipBtn: $("tipBtn"),
     run: $("run"), estimate: $("estimate"),
     progCard: $("progCard"), progTitle: $("progTitle"), progPct: $("progPct"),
     progBar: $("progBar"), progNow: $("progNow"), progEta: $("progEta"), cancel: $("cancel"),
@@ -307,8 +337,8 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
     loupe: $("loupe"), lFrame: $("lFrame"), lStage: $("lStage"), lTime: $("lTime"), lRes: $("lRes"), lSharp: $("lSharp"),
     lPrev: $("lPrev"), lNext: $("lNext"), lPick: $("lPick"), lPickLabel: $("lPickLabel"),
     lCheckWrap: $("lCheckWrap"), lCount: $("lCount"), lExport: $("lExport"),
-    lSave: $("lSave"), lClose: $("lClose"),
-    modeTag: $("modeTag"), exportNote: $("exportNote")
+    lSave: $("lSave"), lCopy: $("lCopy"), lClose: $("lClose"),
+    exportNote: $("exportNote")
   };
 
   var S = {
@@ -360,7 +390,6 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
     if (S.inViewer) {
       els.saveZip.classList.add("hidden");
       els.saveSel.textContent = "Save PNGs";
-      els.modeTag.textContent = "runs in your browser · nothing uploaded";
       if (!S.downloads) {
         note(els.exportNote, "This view cannot write files to your disk. Open the downloadable copy of Frame Lab to save frames, or bulk-export as a ZIP.", "warn");
         els.saveSel.disabled = true;
@@ -372,8 +401,7 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
       els.saveZip.classList.add("primary");
       els.saveSel.classList.remove("primary");
       els.saveSel.textContent = "Save individually";
-      els.modeTag.textContent = "local file · nothing uploaded";
-      note(els.exportNote, "Frames are written at the video's native resolution as lossless PNG. Select what you want and download the lot as a ZIP.");
+      note(els.exportNote, "Frames are written at the video's native resolution as lossless PNG. Select what you want and download the lot as a ZIP, or preview a single frame to copy it straight to the clipboard.");
     }
   }
   (function () {
@@ -464,12 +492,39 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
       Array.prototype.forEach.call(els.cands.querySelectorAll("button"), function (o) {
         o.setAttribute("aria-pressed", String(o === b));
       });
+      markTier();
       els.candHint.textContent = S.cands === 1
         ? "Takes whatever frame sits on the mark, blur and all. Fastest."
         : "Tests " + S.cands + " frames around each mark and keeps the sharpest — skips most motion blur.";
       updateEstimate();
     });
   });
+  function markTier() {
+    Array.prototype.forEach.call(els.tiers.children, function (row) {
+      row.setAttribute("data-on", String(parseInt(row.dataset.n, 10) === S.cands));
+    });
+  }
+  markTier();
+
+  function setTip(open) {
+    els.tip.setAttribute("data-open", String(open));
+    els.tipBtn.setAttribute("aria-expanded", String(open));
+  }
+  els.tipBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    setTip(els.tip.getAttribute("data-open") !== "true");
+  });
+  document.addEventListener("click", function (e) {
+    if (!els.tip.contains(e.target)) setTip(false);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    if (els.tip.getAttribute("data-open") === "true" || els.tip.contains(document.activeElement)) {
+      setTip(false);
+      if (els.tip.contains(document.activeElement)) els.tipBtn.blur();
+    }
+  });
+
   els.interval.addEventListener("input", updateEstimate);
 
   function marksFor() {
@@ -860,6 +915,34 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
   els.lStage.appendChild(full);
   full.setAttribute("aria-label", "Full resolution frame");
 
+  var canCopy = !!(navigator.clipboard && typeof navigator.clipboard.write === "function" && window.ClipboardItem);
+  els.lCopy.classList.toggle("hidden", !canCopy);
+
+  async function copyFrame(f) {
+    var CI = window.ClipboardItem;
+    try {
+      await navigator.clipboard.write([new CI({ "image/png": fullBlob(f) })]);
+    } catch (e) {
+      var b = await fullBlob(f);
+      await navigator.clipboard.write([new CI({ "image/png": b })]);
+    }
+  }
+  els.lCopy.addEventListener("click", async function () {
+    var f = S.frames[S.loupeIdx];
+    if (!f) return;
+    var was = "Copy image";
+    els.lCopy.disabled = true;
+    els.lCopy.textContent = "Copying…";
+    try {
+      await copyFrame(f);
+      els.lCopy.textContent = "Copied";
+    } catch (e) {
+      els.lCopy.textContent = "Copy blocked here";
+    }
+    els.lCopy.disabled = false;
+    setTimeout(function () { els.lCopy.textContent = was; }, 1700);
+  });
+
   var loupeToken = 0;
   async function openLoupe(i) {
     var f = S.frames[i];
@@ -944,6 +1027,5 @@ video.probe{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;le
   window.__FL = S;
 })();
 </script>
-
 </body>
 </html>
